@@ -1,87 +1,49 @@
 export async function GET(req, res) {
 
+  // Console message
+  console.log("In the /api/login route");
 
-  // Make a note we are on
+  // Get values sent to this API
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get('email');
+  const pass = searchParams.get('pass');
 
-  // the api. This goes to the console.
+  console.log("Email:", email);
+  console.log("Password:", pass);
 
-  console.log("in the api page")
-
-
-
-  // get the values
-
-  // that were sent across to us.
-
-  const { searchParams } = new URL(req.url)
-
-  const email = searchParams.get('email')
-
-  const pass = searchParams.get('pass')
-  const address = searchParams.get('address')
-
-
-  console.log(email);
-
-  console.log(pass);
-
-
-  console.log(address);
- 
-
-
-  // database call goes here
+  // Database call goes here
   // =================================================
-
   const { MongoClient } = require('mongodb');
 
-
-  //const url = 'mongodb://root:example@localhost:27017/';
-
+  // MongoDB connection string
   const url = 'mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0';
 
   const client = new MongoClient(url);
-
-
-
-  const dbName = 'app'; // database name
+  const dbName = 'app'; // Database name
 
   await client.connect();
-
   console.log('Connected successfully to server');
 
   const db = client.db(dbName);
+  const collection = db.collection('login'); // Collection name
 
-  const collection = db.collection('login'); // collection name
-
-  const findResult = await collection.find({"username": email}).toArray();
+  // Find user by email
+  const findResult = await collection.find({ username: email }).toArray();
 
   console.log('Found documents =>', findResult);
 
+  let valid = false;
 
-  let valid = false
-
-  if(findResult.length >0 ){
-
-          valid = true;
-
-          console.log("login valid")
-
+  // Check if a matching user exists and password matches
+  if (findResult.length > 0 && findResult[0].password === pass) {
+    valid = true;
+    console.log("Login valid");
   } else {
-
-
-        valid = false;
-
-        console.log("login invalid")
-
+    valid = false;
+    console.log("Login invalid");
   }
 
-
-
- //==========================================================
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"valid" })
-
+  // ==========================================================
+  // Send back the result to the frontend
+  return Response.json({ data: valid ? "valid" : "invalid" });
 }

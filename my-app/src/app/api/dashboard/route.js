@@ -1,48 +1,32 @@
 export async function GET(req, res) {
+  console.log("in the /api/product API");
 
+  const { MongoClient } = require("mongodb");
 
-        // Make a note we are on
+  const url =
+    "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
 
-        // the api. This goes to the console.
+  const client = new MongoClient(url);
+  const dbName = "app";
 
-        console.log("in the api page")
+  await client.connect();
+  console.log("Connected successfully to MongoDB");
 
+  const db = client.db(dbName);
+  const collection = db.collection("products");
 
-        // =================================================
+  const findResult = await collection.find({}).toArray();
 
-        const { MongoClient } = require('mongodb');
+  console.log("Found products:", findResult);
 
- 
+  // Convert MongoDB _id → string id
+  const cleanedProducts = findResult.map((item) => ({
+    id: item._id.toString(),
+    name: item.name,
+    description: item.description,
+    price: item.price,
+    image: item.image
+  }));
 
-        //const url = 'mongodb://root:example@localhost:27017/';
-        const url = 'mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0';
-
-        const client = new MongoClient(url);
-   
-
-        const dbName = 'app'; // database name
-
- 
-
-        await client.connect();
-
-        console.log('Connected successfully to server');
-
-        const db = client.db(dbName);
-
-        const collection = db.collection('products'); // collection name
-
- 
-        const findResult = await collection.find({}).toArray();
-
-        console.log('Found documents =>', findResult);
- 
-
-   //==========================================================
- 
-
-        // at the end of the process we need to send something back.
-
-        return Response.json(findResult)
-
-  }
+  return Response.json({ data: cleanedProducts });
+}

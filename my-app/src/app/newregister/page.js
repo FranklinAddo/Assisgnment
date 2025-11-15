@@ -1,170 +1,128 @@
 'use client';
 
 import * as React from 'react';
-
-import Avatar from '@mui/material/Avatar';
-
 import Button from '@mui/material/Button';
-
-
 import TextField from '@mui/material/TextField';
-
-import FormControlLabel from '@mui/material/FormControlLabel';
-
-import Checkbox from '@mui/material/Checkbox';
-
-import Link from '@mui/material/Link';
-
-import Container from '@mui/material/Container';
-
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Alert from '@mui/material/Alert';
+import { useRouter } from 'next/navigation';
 
+export default function RegisterPage() {
+  const [accountType, setAccountType] = React.useState("Customer");
+  const [success, setSuccess] = React.useState(false);
+  const router = useRouter();
 
+  const handleAccountTypeChange = (event, newType) => {
+    if (newType !== null) {
+      setAccountType(newType);
+    }
+  };
 
-export default function Home() {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
 
+    const email = data.get('email');
+    const pass = data.get('password');
+    const confirm = data.get('confirm');
+    const address = data.get('address');
+    const dob = data.get('dob');
 
-  const handleSubmit = (event) => {
-
-                
-
-  console.log("handling submit");
-
-  event.preventDefault();
-
-  const data = new FormData(event.currentTarget);
-
-
-
-   let email = data.get('email')
-
-   let pass = data.get('pass')
-
-
-   console.log("Sent email:" + email)
-
-   console.log("Sent pass:" + pass)
-
-
-
-   runDBCallAsync(`http://localhost:3000/api/login?email=${email}&pass=${pass}`)
-
-
-
-
-
- }; // end handle submit
-
-
-async function runDBCallAsync(url) {
-
-
-
-    const res = await fetch(url);
-
-    const data = await res.json();
-
-
- 
-
-    if(data.data== "valid"){
-
-      console.log("login is valid!")
-
-
-     
-
-    } else {
-
-
-      console.log("not valid  ")
-
+    if (pass !== confirm) {
+      alert("Passwords do not match!");
+      return;
     }
 
-  }
+    const url = `/api/register?email=${email}&pass=${pass}&type=${accountType}&address=${address}&dob=${dob}`;
 
+    const res = await fetch(url);
+    const result = await res.json();
 
-
+    if (result.data === "valid") {
+      setSuccess(true);
+      setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+    } else if (result.data === "exists") {
+      alert("Email already registered.");
+    } else {
+      alert("Registration failed.");
+    }
+  };
 
   return (
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          bgcolor: "white",
+          p: 4,
+          borderRadius: 3,
+          boxShadow: 5,
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{ textAlign: "center", mb: 3, fontWeight: "bold" }}
+        >
+          REGISTER
+        </Typography>
 
-    <Container maxWidth="sm">
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Registration successful!!!
+          </Alert>
+        )}
 
-    <Box sx={{ height: '100vh' }} >
+        <Box component="form" onSubmit={handleSubmit}>
+          <TextField fullWidth label="Email" name="email" required margin="normal" />
 
+          <TextField fullWidth label="Address" name="address" margin="normal" />
 
-    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          <TextField fullWidth label="Date of Birth" name="dob" margin="normal" />
 
-    <TextField
+          <TextField
+            fullWidth
+            label="Password"
+            name="password"
+            required
+            type="password"
+            margin="normal"
+          />
 
-      margin="normal"
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            name="confirm"
+            required
+            type="password"
+            margin="normal"
+          />
 
-      required
+          <Typography sx={{ mt: 3, mb: 1, fontWeight: "bold"}}>
+            Select Account Type:
+          </Typography>
 
-      fullWidth
+          <ToggleButtonGroup
+            value={accountType}
+            exclusive
+            onChange={handleAccountTypeChange}
+            fullWidth
+            sx={{ mb: 3 }}
+          >
+            <ToggleButton value="Manager">MANAGER</ToggleButton>
+            <ToggleButton value="Customer">CUSTOMER</ToggleButton>
+          </ToggleButtonGroup>
 
-      id="email"
-
-      label="Email Address"
-
-      name="email"
-
-      autoComplete="email"
-
-      autoFocus
-
-    />
-
-    <TextField
-
-      margin="normal"
-
-      required
-
-      fullWidth
-
-      name="pass"
-
-      label="Pass"
-
-      type="pass"
-
-      id="pass"
-
-      autoComplete="current-password"
-
-    />
-
-    <FormControlLabel
-
-      control={<Checkbox value="remember" color="primary" />}
-
-      label="Remember me"
-
-    />
-
-    <Button
-
-      type="submit"
-
-      fullWidth
-
-      variant="contained"
-
-      sx={{ mt: 3, mb: 2 }}
-
-    >
-
-      Sign In
-
-    </Button>
-
-</Box>
-
-</Box>
-
-       </Container>
-
-  ); // end return
-
+          <Button fullWidth variant="contained" type="submit">
+            REGISTER
+          </Button>
+        </Box>
+      </Box>
+    </Container>
+  );
 }

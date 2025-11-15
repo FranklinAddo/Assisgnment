@@ -1,39 +1,64 @@
 export async function GET(req, res) {
 
+  console.log("In the /api/register route");
 
-  // Make a note we are on
+  // Get values sent from the frontend
+  const { searchParams } = new URL(req.url);
 
-  // the api. This goes to the console.
+  const email = searchParams.get('email');
+  const pass = searchParams.get('pass');
+  const type = searchParams.get('type');
+  const address = searchParams.get('address');
+  const dob = searchParams.get('dob');
 
-  console.log("in the api page")
+  console.log("Email:", email);
+  console.log("Password:", pass);
+  console.log("Account Type:", type);
+  console.log("Address:", address);
+  console.log("DOB:", dob);
 
+  // Check required fields
+  if (!email || !pass || !type) {
+    return Response.json({ data: "invalid" });
+  }
 
+  // ==============================
+  // MongoDB connection
+  // ==============================
+  const { MongoClient } = require("mongodb");
 
-  // get the values
+  const url =
+    "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
 
-  // that were sent across to us.
+  const client = new MongoClient(url);
+  const dbName = "app";
 
-  const { searchParams } = new URL(req.url)
+  await client.connect();
+  console.log("Connected to MongoDB");
 
-  const email = searchParams.get('email')
+  const db = client.db(dbName);
+  const collection = db.collection("login");
 
-  const pass = searchParams.get('pass')
+  // Check if email already registered
+  const existing = await collection.find({ username: email }).toArray();
 
+  if (existing.length > 0) {
+    await client.close();
+    return Response.json({ data: "exists" });
+  }
 
-  console.log(email);
+  // Create new user document
+  const newUser = {
+    username: email,
+    password: pass,
+    accountType: type,
+    address: address || "",
+    dateOfBirth: dob || "",
+    createdAt: new Date(),
+  };
 
-  console.log(pass);
+  await collection.insertOne(newUser);
+  await client.close();
 
-
-
- 
-
-
-  // database call goes here
-
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"valid" })
-
+  return Response.json({ data: "valid" });
 }
