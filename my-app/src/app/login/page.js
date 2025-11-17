@@ -20,7 +20,6 @@ export default function Home() {
 
     const email = data.get('email');
     const pass = data.get('pass');
-    const address = data.get('address');
 
     console.log('Sent email:' + email);
     console.log('Sent pass:' + pass);
@@ -36,6 +35,7 @@ export default function Home() {
 
     if (data.data === 'valid') {
       console.log('login is valid!');
+      window.location = "/dashboard";
     } else {
       console.log('not valid');
     }

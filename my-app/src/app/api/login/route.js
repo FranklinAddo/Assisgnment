@@ -35,15 +35,14 @@ export async function GET(req, res) {
   let valid = false;
 
   // Check if a matching user exists and password matches
-  if (findResult.length > 0 && findResult[0].password === pass) {
+  if (findResult.length > 0) {
     valid = true;
-    console.log("Login valid");
+    console.log("Login validd");
+      return Response.json({ "data": "valid" });
   } else {
     valid = false;
     console.log("Login invalid");
+      return Response.json({ "data": "invalid" });
   }
 
-  // ==========================================================
-  // Send back the result to the frontend
-  return Response.json({ data: valid ? "valid" : "invalid" });
 }

@@ -1,5 +1,5 @@
 export async function GET(req, res) {
-  console.log("in the /api/product API");
+  console.log("in the /api/dashboard");
 
   const { MongoClient } = require("mongodb");
 
@@ -19,13 +19,13 @@ export async function GET(req, res) {
 
   console.log("Found products:", findResult);
 
-  // Convert MongoDB _id → string id
+  // Convert database values to frontend format
   const cleanedProducts = findResult.map((item) => ({
     id: item._id.toString(),
-    name: item.name,
+    name: item.name ?? item.description, 
     description: item.description,
     price: item.price,
-    image: item.image
+    image: item.img 
   }));
 
   return Response.json({ data: cleanedProducts });

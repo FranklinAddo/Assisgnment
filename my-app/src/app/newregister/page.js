@@ -6,21 +6,12 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Alert from '@mui/material/Alert';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
-  const [accountType, setAccountType] = React.useState("Customer");
   const [success, setSuccess] = React.useState(false);
   const router = useRouter();
-
-  const handleAccountTypeChange = (event, newType) => {
-    if (newType !== null) {
-      setAccountType(newType);
-    }
-  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -37,7 +28,7 @@ export default function RegisterPage() {
       return;
     }
 
-    const url = `/api/register?email=${email}&pass=${pass}&type=${accountType}&address=${address}&dob=${dob}`;
+    const url = `/api/newregister?email=${email}&pass=${pass}&address=${address}&dob=${dob}`;
 
     const res = await fetch(url);
     const result = await res.json();
@@ -103,22 +94,7 @@ export default function RegisterPage() {
             margin="normal"
           />
 
-          <Typography sx={{ mt: 3, mb: 1, fontWeight: "bold"}}>
-            Select Account Type:
-          </Typography>
-
-          <ToggleButtonGroup
-            value={accountType}
-            exclusive
-            onChange={handleAccountTypeChange}
-            fullWidth
-            sx={{ mb: 3 }}
-          >
-            <ToggleButton value="Manager">MANAGER</ToggleButton>
-            <ToggleButton value="Customer">CUSTOMER</ToggleButton>
-          </ToggleButtonGroup>
-
-          <Button fullWidth variant="contained" type="submit">
+          <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
             REGISTER
           </Button>
         </Box>

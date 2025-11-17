@@ -40,24 +40,11 @@ export async function GET(req, res) {
   const collection = db.collection("login");
 
   // Check if email already registered
-  const existing = await collection.find({ username: email }).toArray();
-
-  if (existing.length > 0) {
-    await client.close();
-    return Response.json({ data: "exists" });
-  }
+  const existing = await collection.insertOne({"email":"johnsmith@gmail.com","firstname":"john","lastname":"smith","password":"12345678","account":"customer"})
 
   // Create new user document
-  const newUser = {
-    username: email,
-    password: pass,
-    accountType: type,
-    address: address || "",
-    dateOfBirth: dob || "",
-    createdAt: new Date(),
-  };
+ 
 
-  await collection.insertOne(newUser);
   await client.close();
 
   return Response.json({ data: "valid" });
