@@ -1,39 +1,27 @@
-export async function GET(req, res) {
+export async function GET(req) {
+  console.log("In /api/view_cart");
 
+  const { MongoClient } = require("mongodb");
 
-  // Make a note we are on
+  const url = "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
 
-  // the api. This goes to the console.
+  const client = new MongoClient(url);
+  const dbName = "app";
 
-  console.log("in the api page")
+  await client.connect();
+  const db = client.db(dbName);
+  const collection = db.collection("shopping_cart");
 
+  const USER = "user@sample.ie"; 
 
+  const items = await collection.find({ username: USER }).toArray();
 
-  // get the values
+  const cleaned = items.map((item) => ({
+    id: item._id.toString(),
+    name: item.pname,
+    quantity: item.quantity || 1,
+    price: item.price || 0
+  }));
 
-  // that were sent across to us.
-
-  const { searchParams } = new URL(req.url)
-
-  const email = searchParams.get('email')
-
-  const pass = searchParams.get('pass')
-
-
-  console.log(email);
-
-  console.log(pass);
-
-
-
- 
-
-
-  // database call goes here
-
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"valid" })
-
+  return Response.json({ data: cleaned });
 }

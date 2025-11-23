@@ -18,6 +18,17 @@ export default function CustomerPage() {
   const [weather, setWeather] = React.useState(null);
   const [loadingWeather, setLoadingWeather] = React.useState(true);
 
+  // FUNCTION: Put item into cart
+  function putInCart(productName) {
+    console.log("Putting in cart:", productName);
+
+    fetch(`/api/putInCart?pname=${encodeURIComponent(productName)}`)
+      .then(() => {
+        setCartCount((prev) => prev + 1);
+      })
+      .catch((err) => console.error("Add to cart failed:", err));
+  }
+
   // ---------------- GET PRODUCTS ----------------
   React.useEffect(() => {
     async function fetchProducts() {
@@ -54,13 +65,8 @@ export default function CustomerPage() {
     fetchWeather();
   }, []);
 
-  const handleAddToCart = (product) => {
-    setCartCount((prev) => prev + 1);
-  };
-
   return (
     <Container sx={{ mt: 5, mb: 5 }}>
-
       {/* ---------- HEADER ---------- */}
       <Box
         sx={{
@@ -74,9 +80,14 @@ export default function CustomerPage() {
           Products
         </Typography>
 
-        <Button variant="contained" color="secondary">
+        <Button 
+          variant="contained" 
+          color="secondary" 
+          onClick={() => window.location.href = "/view_cart"}
+        >
           View Cart ({cartCount})
         </Button>
+
       </Box>
 
       {/* ---------- WEATHER ---------- */}
@@ -118,7 +129,11 @@ export default function CustomerPage() {
               </CardContent>
 
               <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button fullWidth variant="contained" onClick={() => handleAddToCart(product)}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={() => putInCart(product.name)}
+                >
                   Add to Cart
                 </Button>
               </CardActions>

@@ -97,7 +97,7 @@ export default function Home() {
             fullWidth
             variant="outlined"
             sx={{ mt: 1 }}
-
+            onClick={() => window.location.href = "/register"}
           >
             Register
           </Button>
