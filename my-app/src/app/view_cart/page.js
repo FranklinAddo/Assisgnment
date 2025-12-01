@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 export default function CartPage() {
+
   const [cartItems, setCartItems] = React.useState([]);
 
   // Load cart items from database
@@ -34,10 +35,7 @@ export default function CartPage() {
   }, []);
 
   const handleRemove = async (id) => {
-    // Remove visually
     setCartItems(cartItems.filter(item => item.id !== id));
-
-    // Remove from DB (optional API)
     await fetch(`/api/remove_from_cart?id=${id}`);
   };
 
@@ -56,9 +54,10 @@ export default function CartPage() {
       .toFixed(2);
   };
 
+  // ✔ SAME STYLE AS LOGIN PAGE
   const handleCheckout = () => {
     console.log("Proceeding to checkout...");
-    console.log(cartItems);
+    window.location = "/checkout";   // ← EXACT SAME APPROACH AS LOGIN
   };
 
   return (

@@ -6,38 +6,42 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 export default function Home() {
   const handleSubmit = (event) => {
-    console.log('handling submit');
     event.preventDefault();
 
     const data = new FormData(event.currentTarget);
-
     const email = data.get('email');
     const pass = data.get('pass');
 
-    console.log('Sent email:' + email);
-    console.log('Sent pass:' + pass);
-
-    runDBCallAsync(
-      `http://localhost:3000/api/login?email=${email}&pass=${pass}`
-    );
-  }; // end handle submit
+    runDBCallAsync(`/api/login?email=${email}&pass=${pass}`);
+  };
 
   async function runDBCallAsync(url) {
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.data === 'valid') {
-      console.log('login is valid!');
-      window.location = "/dashboard";
+    console.log("Login API Response:", data);
+
+    if (data.data === "valid") {
+      // Save user info to localStorage for later use
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("role", data.role);
+
+      console.log("Login valid, role:", data.role);
+
+      // Redirect based on role
+      if (data.role === "manager") {
+        window.location.href = "/manager";
+      } else {
+        window.location.href = "/dashboard";
+      }
     } else {
-      console.log('not valid');
+      alert("Invalid email or password.");
     }
   }
 
@@ -97,12 +101,12 @@ export default function Home() {
             fullWidth
             variant="outlined"
             sx={{ mt: 1 }}
-            onClick={() => window.location.href = "/register"}
+            onClick={() => (window.location.href = "/newregister")}
           >
             Register
           </Button>
         </Box>
       </Box>
     </Container>
-  ); // end return
+  );
 }

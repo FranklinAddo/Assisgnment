@@ -1,39 +1,39 @@
-export async function GET(req, res) {
+export async function GET(req) {
+  console.log("In /api/orders");
 
+  const { MongoClient } = require("mongodb");
 
-  // Make a note we are on
+  const url =
+    "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
+  const client = new MongoClient(url);
+  const dbName = "app";
 
-  // the api. This goes to the console.
+  await client.connect();
+  console.log("Connected to MongoDB for orders");
 
-  console.log("in the api page")
+  const db = client.db(dbName);
+  const collection = db.collection("orders");
 
+  const results = await collection.find({}).toArray();
 
+  const orders = results.map((order) => ({
+    orderId: order._id.toString(),
+    customer: order.customer,
+    items: order.items.length + " items",
+    total: order.total || 0,
+    date: order.date,
+  }));
 
-  // get the values
+  const totalOrders = orders.length;
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
 
-  // that were sent across to us.
+  await client.close();
 
-  const { searchParams } = new URL(req.url)
-
-  const email = searchParams.get('email')
-
-  const pass = searchParams.get('pass')
-
-
-  console.log(email);
-
-  console.log(pass);
-
-
-
- 
-
-
-  // database call goes here
-
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"valid" })
-
+  return Response.json({
+    orders,
+    stats: {
+      totalOrders,
+      totalRevenue,
+    },
+  });
 }

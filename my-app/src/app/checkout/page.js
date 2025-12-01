@@ -28,9 +28,7 @@ export default function CartPage() {
   const handleQuantityChange = (id, value) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? { ...item, quantity: value > 0 ? value : 1 }
-          : item
+        item.id === id ? { ...item, quantity: value > 0 ? value : 1 } : item
       )
     );
   };
@@ -42,8 +40,8 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    console.log('Proceeding to checkout...');
-    // router.push('/checkout') if using Next.js routing
+    console.log("Proceeding to checkout...");
+    window.location.href = "/checkout";   // 🔥 FIXED
   };
 
   return (
@@ -59,7 +57,6 @@ export default function CartPage() {
           border: '1px solid #e0dfe5',
         }}
       >
-        {/* Title */}
         <Typography
           component="h1"
           variant="h5"
@@ -73,7 +70,6 @@ export default function CartPage() {
           Cart Summary
         </Typography>
 
-        {/* Table */}
         <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
           <Table>
             <TableHead>
@@ -120,10 +116,7 @@ export default function CartPage() {
                       variant="outlined"
                       color="error"
                       size="small"
-                      sx={{
-                        textTransform: 'uppercase',
-                        fontWeight: 'bold',
-                      }}
+                      sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
                       onClick={() => handleRemove(item.id)}
                     >
                       Remove
@@ -143,7 +136,6 @@ export default function CartPage() {
           </Table>
         </TableContainer>
 
-        {/* Total and Checkout */}
         <Box
           sx={{
             display: 'flex',
@@ -152,10 +144,7 @@ export default function CartPage() {
             mt: 3,
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 'bold', color: '#333' }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>
             Total: ${getTotal()}
           </Typography>
 
@@ -170,7 +159,7 @@ export default function CartPage() {
               '&:hover': { backgroundColor: '#6a1b9a' },
             }}
           >
-            Proceed to Checkout
+            Confirm Order
           </Button>
         </Box>
       </Paper>
