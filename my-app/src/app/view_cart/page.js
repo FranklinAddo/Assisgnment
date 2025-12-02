@@ -15,115 +15,79 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 
 export default function CartPage() {
-
   const [cartItems, setCartItems] = React.useState([]);
 
-  // Load cart items from database
+  // Load the cart from the database for the logged-in user
   React.useEffect(() => {
     async function loadCart() {
-      try {
-        const res = await fetch("/api/view_cart");
-        const json = await res.json();
-        console.log("Loaded Cart Items:", json.data);
-        setCartItems(json.data);
-      } catch (err) {
-        console.error("Error loading cart:", err);
+      const email = localStorage.getItem("email");
+
+      if (!email) {
+        alert("You must be logged in to view your cart.");
+        window.location.href = "/";
+        return;
       }
+
+      const res = await fetch(`/api/view_cart?username=${email}`);
+      const json = await res.json();
+
+      console.log("Loaded cart:", json);
+
+      setCartItems(json.data);
     }
 
     loadCart();
   }, []);
 
-  const handleRemove = async (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-    await fetch(`/api/remove_from_cart?id=${id}`);
-  };
-
-  const handleQuantityChange = (id, newQuantity) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id
-        ? { ...item, quantity: newQuantity > 0 ? newQuantity : 1 }
-        : item
-    );
-    setCartItems(updatedCart);
-  };
-
-  const getTotal = () => {
-    return cartItems
-      .reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0)
+  // Total calculation
+  const getTotal = () =>
+    cartItems
+      .reduce((sum, item) => sum + item.price * item.quantity, 0)
       .toFixed(2);
-  };
 
-  // ✔ SAME STYLE AS LOGIN PAGE
+  // Redirect to checkout
   const handleCheckout = () => {
-    console.log("Proceeding to checkout...");
-    window.location = "/checkout";   // ← EXACT SAME APPROACH AS LOGIN
+    window.location.href = "/checkout";
   };
 
   return (
     <Container maxWidth="md">
       <Box
         sx={{
-          mt: 6,
-          mb: 4,
-          bgcolor: "#121212",
+          mt: 5,
           p: 4,
+          bgcolor: "#111",
           borderRadius: 2,
+          color: "white",
           boxShadow: 4,
         }}
       >
-        <Typography
-          component="h1"
-          variant="h5"
-          sx={{ color: "white", textAlign: "center", mb: 3 }}
-        >
+        <Typography variant="h5" sx={{ textAlign: "center", mb: 3 }}>
           Cart Summary
         </Typography>
 
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: "hidden" }}>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell><strong>Product</strong></TableCell>
                 <TableCell align="center"><strong>Quantity</strong></TableCell>
                 <TableCell align="center"><strong>Price</strong></TableCell>
-                <TableCell align="center"><strong>Remove</strong></TableCell>
+                <TableCell align="center"><strong>Total</strong></TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {cartItems.map((item) => (
+              {cartItems.map(item => (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>
 
-                  <TableCell align="center">
-                    <TextField
-                      type="number"
-                      size="small"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleQuantityChange(item.id, parseInt(e.target.value))
-                      }
-                      inputProps={{
-                        min: 1,
-                        style: { textAlign: "center", width: "60px" },
-                      }}
-                    />
-                  </TableCell>
+                  <TableCell align="center">{item.quantity}</TableCell>
+
+                  <TableCell align="center">€{item.price.toFixed(2)}</TableCell>
 
                   <TableCell align="center">
-                    €{(item.price || 0).toFixed(2)}
-                  </TableCell>
-
-                  <TableCell align="center">
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      onClick={() => handleRemove(item.id)}
-                    >
-                      Remove
-                    </Button>
+                    €{(item.price * item.quantity).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -139,21 +103,19 @@ export default function CartPage() {
           </Table>
         </TableContainer>
 
-        {/* Total + Checkout */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mt: 3,
-            color: "white",
-          }}
-        >
-          <Typography variant="h6">Total: €{getTotal()}</Typography>
+        <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography variant="h6">
+            Total: €{getTotal()}
+          </Typography>
 
           <Button
             variant="contained"
-            color="secondary"
+            sx={{
+              backgroundColor: "#7b1fa2",
+              fontWeight: "bold",
+              px: 3,
+              "&:hover": { backgroundColor: "#6a1b9a" },
+            }}
             onClick={handleCheckout}
             disabled={cartItems.length === 0}
           >

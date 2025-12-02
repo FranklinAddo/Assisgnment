@@ -18,15 +18,35 @@ export default function CustomerPage() {
   const [weather, setWeather] = React.useState(null);
   const [loadingWeather, setLoadingWeather] = React.useState(true);
 
-  // FUNCTION: Put item into cart
-  function putInCart(productName) {
-    console.log("Putting in cart:", productName);
+  // ---------------- ADD TO CART ----------------
+  async function putInCart(product) {
+    const username = localStorage.getItem("email");
 
-    fetch(`/api/putInCart?pname=${encodeURIComponent(productName)}`)
-      .then(() => {
-        setCartCount((prev) => prev + 1);
-      })
-      .catch((err) => console.error("Add to cart failed:", err));
+    if (!username) {
+      alert("You must be logged in to add items to cart.");
+      return;
+    }
+
+    const url = `/api/putInCart?pname=${encodeURIComponent(
+      product.name
+    )}&price=${product.price}&username=${encodeURIComponent(username)}`;
+
+    console.log("Calling:", url);
+
+    const res = await fetch(url);
+    const json = await res.json();
+
+    console.log("Cart API response:", json);
+
+    // Update cart display count
+    setCartCount((prev) => prev + 1);
+
+    // Removed Alerts 👇
+    if (json.data === "quantity_increased") {
+      console.log(`Quantity increased for ${product.name}`);
+    } else {
+      console.log(`${product.name} added to cart`);
+    }
   }
 
   // ---------------- GET PRODUCTS ----------------
@@ -80,14 +100,13 @@ export default function CustomerPage() {
           Products
         </Typography>
 
-        <Button 
-          variant="contained" 
-          color="secondary" 
-          onClick={() => window.location.href = "/view_cart"}
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => (window.location.href = "/view_cart")}
         >
           View Cart ({cartCount})
         </Button>
-
       </Box>
 
       {/* ---------- WEATHER ---------- */}
@@ -132,7 +151,7 @@ export default function CustomerPage() {
                 <Button
                   fullWidth
                   variant="contained"
-                  onClick={() => putInCart(product.name)}
+                  onClick={() => putInCart(product)}
                 >
                   Add to Cart
                 </Button>

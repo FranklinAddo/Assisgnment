@@ -12,37 +12,65 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 
-export default function CartPage() {
-  const [cartItems, setCartItems] = React.useState([
-    { id: 1, name: 'Sample Product 1', quantity: 2, price: 19.99 },
-    { id: 2, name: 'Sample Product 2', quantity: 1, price: 24.99 },
-    { id: 3, name: 'Sample Product 3', quantity: 3, price: 9.99 },
-  ]);
+export default function CheckoutPage() {
+  const [cartItems, setCartItems] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
 
-  const handleRemove = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  React.useEffect(() => {
+    async function loadCart() {
+      const email = localStorage.getItem("email");
+      if (!email) {
+        alert("Please login first.");
+        window.location.href = "/";
+        return;
+      }
 
-  const handleQuantityChange = (id, value) => {
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: value > 0 ? value : 1 } : item
-      )
-    );
-  };
+      const res = await fetch(`/api/view_cart?username=${email}`);
+      const json = await res.json();
+      setCartItems(json.data);
+      setLoading(false);
+    }
 
-  const getTotal = () => {
-    return cartItems
-      .reduce((acc, item) => acc + item.price * item.quantity, 0)
-      .toFixed(2);
-  };
+    loadCart();
+  }, []);
 
-  const handleCheckout = () => {
-    console.log("Proceeding to checkout...");
-    window.location.href = "/checkout";   // 🔥 FIXED
-  };
+  const totalPrice = cartItems
+    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .toFixed(2);
+
+  // -------------------
+  // CONFIRM ORDER
+  // -------------------
+  async function confirmOrder() {
+    const email = localStorage.getItem("email");
+
+    const payload = {
+      username: email,
+      items: cartItems,
+      total: Number(totalPrice)
+    };
+
+    const res = await fetch("/api/confirm_order", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    const json = await res.json();
+
+    if (json.status === "success") {
+      alert("Order placed successfully!");
+
+      // Clear cart
+      await fetch(`/api/clear_cart?username=${email}`);
+
+      window.location.href = "/success"; // redirect anywhere you want
+    } else {
+      alert("Order failed. Try again.");
+    }
+  }
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <Container maxWidth="md">
@@ -67,23 +95,18 @@ export default function CartPage() {
             color: '#4a148c',
           }}
         >
-          Cart Summary
+          Checkout
         </Typography>
 
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+        {/* CART TABLE */}
+        <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold' }}>Product</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                  Quantity
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                  Price
-                </TableCell>
-                <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                  Remove
-                </TableCell>
+                <TableCell><strong>Product</strong></TableCell>
+                <TableCell align="center"><strong>Qty</strong></TableCell>
+                <TableCell align="center"><strong>Price</strong></TableCell>
+                <TableCell align="center"><strong>Total</strong></TableCell>
               </TableRow>
             </TableHead>
 
@@ -91,73 +114,28 @@ export default function CartPage() {
               {cartItems.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell>{item.name}</TableCell>
-
+                  <TableCell align="center">{item.quantity}</TableCell>
+                  <TableCell align="center">€{item.price}</TableCell>
                   <TableCell align="center">
-                    <TextField
-                      type="number"
-                      size="small"
-                      value={item.quantity}
-                      onChange={(e) =>
-                        handleQuantityChange(item.id, parseInt(e.target.value))
-                      }
-                      inputProps={{
-                        min: 1,
-                        style: { textAlign: 'center', width: '60px' },
-                      }}
-                    />
-                  </TableCell>
-
-                  <TableCell align="center">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </TableCell>
-
-                  <TableCell align="center">
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      sx={{ textTransform: 'uppercase', fontWeight: 'bold' }}
-                      onClick={() => handleRemove(item.id)}
-                    >
-                      Remove
-                    </Button>
+                    €{(item.price * item.quantity).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
-
-              {cartItems.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    Your cart is empty.
-                  </TableCell>
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mt: 3,
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#333' }}>
-            Total: ${getTotal()}
+        {/* TOTAL */}
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Total Amount: €{totalPrice}
           </Typography>
 
           <Button
             variant="contained"
-            onClick={handleCheckout}
-            sx={{
-              backgroundColor: '#7b1fa2',
-              borderRadius: 2,
-              fontWeight: 'bold',
-              px: 3,
-              '&:hover': { backgroundColor: '#6a1b9a' },
-            }}
+            color="secondary"
+            sx={{ mt: 2 }}
+            onClick={confirmOrder}
           >
             Confirm Order
           </Button>

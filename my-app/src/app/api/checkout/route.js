@@ -1,39 +1,50 @@
-export async function GET(req, res) {
+export async function GET(req) {
+  console.log("In /api/checkout");
 
+  const { searchParams } = new URL(req.url);
+  const username = searchParams.get("username");
 
-  // Make a note we are on
+  if (!username) {
+    return Response.json({ status: "error", message: "Missing username" });
+  }
 
-  // the api. This goes to the console.
+  const { MongoClient } = require("mongodb");
+  const url = "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
 
-  console.log("in the api page")
+  const client = new MongoClient(url);
+  await client.connect();
+  const db = client.db("app");
 
+  // ---------------- FETCH CART ----------------
+  const cartItems = await db
+    .collection("shopping_cart")
+    .find({ username })
+    .toArray();
 
+  if (cartItems.length === 0) {
+    return Response.json({ status: "error", message: "Cart empty" });
+  }
 
-  // get the values
+  // ---------------- BUILD ORDER ----------------
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
-  // that were sent across to us.
+  const orderData = {
+    username,
+    items: cartItems,
+    total,
+    date: new Date().toISOString(),
+  };
 
-  const { searchParams } = new URL(req.url)
+  // Insert into "orders"
+  await db.collection("orders").insertOne(orderData);
 
-  const email = searchParams.get('email')
+  // ---------------- CLEAR CART ----------------
+  await db.collection("shopping_cart").deleteMany({ username });
 
-  const pass = searchParams.get('pass')
+  await client.close();
 
-
-  console.log(email);
-
-  console.log(pass);
-
-
-
- 
-
-
-  // database call goes here
-
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"valid" })
-
+  return Response.json({ status: "success" });
 }

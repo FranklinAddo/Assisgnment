@@ -8,48 +8,40 @@ export async function GET(req) {
   const { MongoClient } = require("mongodb");
   const bcrypt = require("bcrypt");
 
-  const url ="mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
+  const url = "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
   const client = new MongoClient(url);
-  const dbName = "app";
 
   await client.connect();
-  console.log("Connected successfully to server");
-
-  const db = client.db(dbName);
+  const db = client.db("app");
   const collection = db.collection("login");
 
-  let user = await collection.findOne({ email: email });
-
-  if (!user) {
-    user = await collection.findOne({ username: email });
-  }
+  const user = await collection.findOne({
+    $or: [{ email: email }, { username: email }]
+  });
 
   if (!user) {
     console.log("User not found");
     return Response.json({ data: "invalid" });
   }
 
-  console.log("Found user account type:", user.account || user.acc_type);
+  const role = user.account || user.acc_type || "customer";
 
-  let passwordMatches = false;
+  let validPassword = false;
 
-  if (user.acc_type === "manager") {
-    passwordMatches = pass === user.pass;
-  } 
-  else {
-    passwordMatches = bcrypt.compareSync(pass, user.pass);
+  if (role === "manager") {
+    validPassword = user.pass === pass; 
+  } else {
+    validPassword = bcrypt.compareSync(pass, user.pass);
   }
 
-  if (!passwordMatches) {
+  if (!validPassword) {
     console.log("Password incorrect");
     return Response.json({ data: "invalid" });
   }
 
-  console.log("Login valid.");
-
   return Response.json({
     data: "valid",
-    role: user.account || user.acc_type,
-    email: email
+    role,
+    email: user.email || user.username
   });
 }

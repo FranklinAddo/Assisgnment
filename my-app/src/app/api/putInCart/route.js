@@ -1,53 +1,30 @@
-export async function GET(req, res) {
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
 
+  const pname = searchParams.get("pname");
+  const username = searchParams.get("username");
+  const price = Number(searchParams.get("price")) || 0;
 
-  // Make a note we are on
+  if (!username) {
+    console.log("❌ No username provided!");
+    return Response.json({ data: "missing-user" });
+  }
 
-  // the api. This goes to the console.
-
-  console.log("in the putInCart api page")
-
-
-  // get the values
-
-  // that were sent across to us.
-
-  const { searchParams } = new URL(req.url)
-
-  const pname = searchParams.get('pname')
-
-  console.log(pname);
-
- // =================================================
-
-  const { MongoClient } = require('mongodb');
-
+  const { MongoClient } = require("mongodb");
   const url = "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
-
   const client = new MongoClient(url);
 
-  const dbName = 'app'; // database name
-
   await client.connect();
+  const db = client.db("app");
 
-  console.log('Connected successfully to server');
+  const newItem = {
+    pname,
+    username,
+    price,
+    quantity: 1
+  };
 
-  const db = client.db(dbName);
+  await db.collection("shopping_cart").insertOne(newItem);
 
-  const collection = db.collection('shopping_cart'); // collection name
-
-
-  var myobj = { pname: pname, username: "user@sample.ie"};
-
-  const insertResult = await collection.insertOne(myobj);
-
- //==========================================================
-
-  // at the end of the process we need to send something back.
-
-  return Response.json({ "data":"" + "inserted" + ""})
-
+  return Response.json({ data: "inserted" });
 }
-
-
-
