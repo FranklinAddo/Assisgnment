@@ -4,7 +4,9 @@ export default function OrderSuccess() {
   return (
     <div style={{ padding: "40px", textAlign: "center" }}>
       <h1>Order Successful!</h1>
+      <p>Enjoy your meal!!</p>
       <p>Thank you for your purchase.</p>
+      <p>Come back for more.....</p>
 
       <button
         style={{

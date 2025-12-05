@@ -63,7 +63,7 @@ export default function CustomerPage() {
       try {
         const url =
           "https://api.open-meteo.com/v1/forecast?latitude=53.35&longitude=-6.26&current=temperature_2m,weather_code&timezone=auto";
-
+          
         const res = await fetch(url);
         const data = await res.json();
 

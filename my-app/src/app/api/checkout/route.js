@@ -1,5 +1,3 @@
-// app/api/checkout/route.js
-
 export async function GET(req) {
   console.log("In /api/checkout");
 

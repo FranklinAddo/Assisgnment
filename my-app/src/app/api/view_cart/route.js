@@ -5,7 +5,7 @@ export async function GET(req) {
   const username = searchParams.get("username");
 
   if (!username) {
-    console.log("❌ No username provided");
+    console.log("No username provided");
     return Response.json({ data: [] });
   }
 

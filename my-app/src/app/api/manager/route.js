@@ -3,8 +3,7 @@ export async function GET(req) {
 
   const { MongoClient } = require("mongodb");
 
-  const url =
-    "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
+  const url = "mongodb+srv://root:myPassword123@cluster0.hfrrotx.mongodb.net/?appName=Cluster0";
   const client = new MongoClient(url);
   const dbName = "app";
 
