@@ -1,3 +1,5 @@
+// app/api/checkout/route.js
+
 export async function GET(req) {
   console.log("In /api/checkout");
 
@@ -22,14 +24,16 @@ export async function GET(req) {
     .toArray();
 
   if (cartItems.length === 0) {
+    await client.close();
     return Response.json({ status: "error", message: "Cart empty" });
   }
 
   // ---------------- BUILD ORDER ----------------
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const total = cartItems.reduce((sum, item) => {
+    const price = Number(item.price) || 0;
+    const qty = Number(item.quantity) || 1;
+    return sum + price * qty;
+  }, 0);
 
   const orderData = {
     username,

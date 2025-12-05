@@ -6,7 +6,7 @@ export async function GET(req) {
   const price = Number(searchParams.get("price")) || 0;
 
   if (!username) {
-    console.log("❌ No username provided!");
+    console.log("No username provided");
     return Response.json({ data: "missing-user" });
   }
 

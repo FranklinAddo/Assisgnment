@@ -31,17 +31,11 @@ export default function CustomerPage() {
       product.name
     )}&price=${product.price}&username=${encodeURIComponent(username)}`;
 
-    console.log("Calling:", url);
-
     const res = await fetch(url);
     const json = await res.json();
 
-    console.log("Cart API response:", json);
-
-    // Update cart display count
     setCartCount((prev) => prev + 1);
 
-    // Removed Alerts 👇
     if (json.data === "quantity_increased") {
       console.log(`Quantity increased for ${product.name}`);
     } else {
@@ -63,18 +57,19 @@ export default function CustomerPage() {
     fetchProducts();
   }, []);
 
-  // ---------------- WEATHER ----------------
+  // ---------------- WEATHER (Open-Meteo) ----------------
   React.useEffect(() => {
     async function fetchWeather() {
       try {
-        const city = "New York";
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=YOUR_API_KEY`
-        );
+        const url =
+          "https://api.open-meteo.com/v1/forecast?latitude=53.35&longitude=-6.26&current=temperature_2m,weather_code&timezone=auto";
+
+        const res = await fetch(url);
         const data = await res.json();
 
-        if (data?.main) {
-          setWeather(`${data.name} — ${data.main.temp}°C`);
+        if (data?.current) {
+          const temp = data.current.temperature_2m;
+          setWeather(`Dublin — ${temp}°C`);
         }
       } catch (err) {
         console.error("Weather error:", err);
@@ -82,6 +77,7 @@ export default function CustomerPage() {
         setLoadingWeather(false);
       }
     }
+
     fetchWeather();
   }, []);
 

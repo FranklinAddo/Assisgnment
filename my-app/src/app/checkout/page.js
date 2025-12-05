@@ -17,6 +17,7 @@ export default function CheckoutPage() {
   const [cartItems, setCartItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
 
+  // Load items from /api/view_cart
   React.useEffect(() => {
     async function loadCart() {
       const email = localStorage.getItem("email");
@@ -26,46 +27,49 @@ export default function CheckoutPage() {
         return;
       }
 
-      const res = await fetch(`/api/view_cart?username=${email}`);
-      const json = await res.json();
-      setCartItems(json.data);
-      setLoading(false);
+      try {
+        const res = await fetch(`/api/view_cart?username=${email}`);
+        const json = await res.json();
+        setCartItems(json.data || []);
+      } catch (err) {
+        console.error("Error loading cart:", err);
+      } finally {
+        setLoading(false);
+      }
     }
 
     loadCart();
   }, []);
 
   const totalPrice = cartItems
-    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .reduce(
+      (sum, item) =>
+        sum + (Number(item.price) || 0) * (Number(item.quantity) || 1),
+      0
+    )
     .toFixed(2);
 
-  // -------------------
-  // CONFIRM ORDER
-  // -------------------
+  // CONFIRM ORDER: call /api/checkout, then redirect to /success
   async function confirmOrder() {
     const email = localStorage.getItem("email");
+    if (!email) {
+      alert("Please login first.");
+      window.location.href = "/";
+      return;
+    }
 
-    const payload = {
-      username: email,
-      items: cartItems,
-      total: Number(totalPrice)
-    };
+    try {
+      const res = await fetch(`/api/checkout?username=${encodeURIComponent(email)}`);
+      const json = await res.json();
 
-    const res = await fetch("/api/confirm_order", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-
-    const json = await res.json();
-
-    if (json.status === "success") {
-      alert("Order placed successfully!");
-
-      // Clear cart
-      await fetch(`/api/clear_cart?username=${email}`);
-
-      window.location.href = "/success"; // redirect anywhere you want
-    } else {
+      if (json.status === "success") {
+        // Order inserted into "orders" and cart cleared by API
+        window.location.href = "/success";
+      } else {
+        alert(json.message || "Order failed. Try again.");
+      }
+    } catch (err) {
+      console.error("Checkout error:", err);
       alert("Order failed. Try again.");
     }
   }
@@ -117,15 +121,23 @@ export default function CheckoutPage() {
                   <TableCell align="center">{item.quantity}</TableCell>
                   <TableCell align="center">€{item.price}</TableCell>
                   <TableCell align="center">
-                    €{(item.price * item.quantity).toFixed(2)}
+                    €{((Number(item.price) || 0) * (Number(item.quantity) || 1)).toFixed(2)}
                   </TableCell>
                 </TableRow>
               ))}
+
+              {cartItems.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    Your cart is empty.
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        {/* TOTAL */}
+        {/* TOTAL + CONFIRM BUTTON */}
         <Box sx={{ mt: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
             Total Amount: €{totalPrice}
@@ -136,6 +148,7 @@ export default function CheckoutPage() {
             color="secondary"
             sx={{ mt: 2 }}
             onClick={confirmOrder}
+            disabled={cartItems.length === 0}
           >
             Confirm Order
           </Button>

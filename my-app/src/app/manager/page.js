@@ -19,7 +19,6 @@ export default function ManagerPage() {
   const [stats, setStats] = React.useState({});
   const [loading, setLoading] = React.useState(true);
 
-  // 🔐 BLOCK ACCESS IF NOT MANAGER
   React.useEffect(() => {
     const role = localStorage.getItem("role");
 
