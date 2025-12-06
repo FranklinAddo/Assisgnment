@@ -50,6 +50,18 @@ export default function ManagerPage() {
           Manager Dashboard
         </Typography>
 
+        {/* Graph Button */}
+        <Box sx={{ textAlign: "center" }}>
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ mb: 3 }}
+            onClick={() => (window.location.href = "/graph")}
+          >
+            Graph Data
+          </Button>
+        </Box>
+
         {/* Stats */}
         <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 3 }}>
           <Typography variant="h6">Total Orders: {stats.totalOrders}</Typography>
