@@ -143,9 +143,7 @@ export default function CustomerPage() {
               </CardContent>
 
               <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button
-                  fullWidth
-                  variant="contained"
+                <Button fullWidth variant="contained"
                   onClick={() => putInCart(product)}
                 >
                   Add to Cart

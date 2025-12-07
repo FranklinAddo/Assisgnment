@@ -143,13 +143,7 @@ export default function CheckoutPage() {
             Total Amount: €{totalPrice}
           </Typography>
 
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{ mt: 2 }}
-            onClick={confirmOrder}
-            disabled={cartItems.length === 0}
-          >
+          <Button variant="contained" color="secondary" sx={{ mt: 2 }} onClick={confirmOrder} disabled={cartItems.length === 0} >
             Confirm Order
           </Button>
         </Box>

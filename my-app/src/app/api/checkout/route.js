@@ -40,7 +40,7 @@ export async function GET(req) {
     date: new Date().toISOString(),
   };
 
-  // Insert into "orders"
+  // Insert into orders
   await db.collection("orders").insertOne(orderData);
 
   // ---------------- CLEAR CART ----------------

@@ -29,7 +29,7 @@ ChartJS.register(
 export default function GraphPage() {
   const [chartData, setChartData] = useState(null);
 
-  // Load graph data
+  //Load Graph data 
   useEffect(() => {
     async function loadData() {
       const response = await fetch("/api/salesgraph");
@@ -74,7 +74,19 @@ export default function GraphPage() {
         {!chartData ? (
           <p>Loading graph...</p>
         ) : (
-          <Line data={chartData} />
+          <Line
+            data={chartData}
+            options={{
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    stepSize: 1,
+                  },
+                },
+              },
+            }}
+          />
         )}
       </Paper>
     </Container>

@@ -34,10 +34,7 @@ export default function RegisterPage() {
     const result = await res.json();
 
     if (result.data === "valid") {
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
+      setSuccess(true);  
     } else if (result.data === "exists") {
       alert("Email already registered.");
     } else {
@@ -63,41 +60,39 @@ export default function RegisterPage() {
           REGISTER
         </Typography>
 
+        {/* SUCCESS MESSAGE */}
         {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Registration successful!!!
-          </Alert>
+          <>
+            <Alert severity="success" sx={{ mb: 2 }}>
+              Registration successful!
+            </Alert>
+
+            <Button fullWidth variant="outlined" sx={{ mb: 2 }}
+              onClick={() => router.push('/login')}
+            >
+              Go to Login
+            </Button>
+          </>
         )}
 
-        <Box component="form" onSubmit={handleSubmit}>
-          <TextField fullWidth label="Email" name="email" required margin="normal" />
+        {/* REGISTRATION FORM */}
+        {!success && (
+          <Box component="form" onSubmit={handleSubmit}>
+            <TextField fullWidth label="Email" name="email" required margin="normal" />
 
-          <TextField fullWidth label="Address" name="address" margin="normal" />
+            <TextField fullWidth label="Address" name="address" margin="normal" />
 
-          <TextField fullWidth label="Date of Birth" name="dob" margin="normal" />
+            <TextField fullWidth label="Date of Birth" name="dob" margin="normal" />
 
-          <TextField
-            fullWidth
-            label="Password"
-            name="password"
-            required
-            type="password"
-            margin="normal"
-          />
+            <TextField fullWidth label="Password" name="password" required type="password" margin="normal" />
 
-          <TextField
-            fullWidth
-            label="Confirm Password"
-            name="confirm"
-            required
-            type="password"
-            margin="normal"
-          />
+            <TextField fullWidth label="Confirm Password" name="confirm" required type="password" margin="normal" />
 
-          <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
-            REGISTER
-          </Button>
-        </Box>
+            <Button fullWidth variant="contained" type="submit" sx={{ mt: 2 }}>
+              REGISTER
+            </Button>
+          </Box>
+        )}
       </Box>
     </Container>
   );
